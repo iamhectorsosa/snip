@@ -3,8 +3,8 @@ all:
 	@echo "**                      Makefile                        **"
 	@echo "**********************************************************"
 
-run:
-	go run .
+build:
+	go build -o snippets
 
 test:
 	go test ./... -cover
