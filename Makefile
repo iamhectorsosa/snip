@@ -4,7 +4,7 @@ all:
 	@echo "**********************************************************"
 
 build:
-	go build -o snippets
+	go build -o snippets .
 
 test:
 	go test ./... -cover
