@@ -30,10 +30,13 @@ var add = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name, text := args[0], args[1]
 
-		db, cleanup := database.New()
+		db, cleanup, err := database.New()
+		if err != nil {
+			return fmt.Errorf("Error database.New: %v", err)
+		}
 		defer cleanup()
 
-		err := db.Create(name, text)
+		err = db.Create(name, text)
 		if err != nil {
 			return fmt.Errorf("Error Create: %v", err)
 		}
@@ -52,7 +55,10 @@ var view = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		idStr := args[0]
-		db, cleanup := database.New()
+		db, cleanup, err := database.New()
+		if err != nil {
+			return fmt.Errorf("Error database.New: %v", err)
+		}
 		defer cleanup()
 
 		id, err := strconv.Atoi(idStr)
@@ -75,7 +81,10 @@ var list = &cobra.Command{
 	Short: "List all snippets",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		db, cleanup := database.New()
+		db, cleanup, err := database.New()
+		if err != nil {
+			return fmt.Errorf("Error database.New: %v", err)
+		}
 		defer cleanup()
 
 		snippets, err := db.ReadAll()
@@ -101,7 +110,10 @@ var update = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		idStr, name, text := args[0], args[1], args[2]
-		db, cleanup := database.New()
+		db, cleanup, err := database.New()
+		if err != nil {
+			return fmt.Errorf("Error database.New: %v", err)
+		}
 		defer cleanup()
 
 		id, err := strconv.Atoi(idStr)
@@ -135,7 +147,10 @@ var delete = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		idStr := args[0]
-		db, cleanup := database.New()
+		db, cleanup, err := database.New()
+		if err != nil {
+			return fmt.Errorf("Error database.New: %v", err)
+		}
 		defer cleanup()
 
 		id, err := strconv.Atoi(idStr)

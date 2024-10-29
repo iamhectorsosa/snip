@@ -3,8 +3,6 @@ package database
 import (
 	"database/sql"
 	"embed"
-	"fmt"
-	"os"
 
 	"github.com/iamhectorsosa/snippets/internal/store"
 	"github.com/pressly/goose/v3"
@@ -17,43 +15,39 @@ type Store struct {
 //go:embed sql/*.sql
 var embedMigrations embed.FS
 
-func New() (store *Store, cleanup func()) {
+func New() (store *Store, cleanup func() error, err error) {
 	db, err := sql.Open("libsql", "file:./local.db")
 	if err != nil {
-		fmt.Println("Error newDb:", err)
-		os.Exit(1)
+		return nil, nil, err
 	}
 
 	goose.SetLogger(goose.NopLogger())
 
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("turso"); err != nil {
-		fmt.Println("Error goose:", err)
-		os.Exit(1)
+		return nil, nil, err
 	}
 
 	if err := goose.Up(db, "sql"); err != nil {
-		fmt.Println("Error goose:", err)
-		os.Exit(1)
+		return nil, nil, err
 	}
 
-	cleanup = func() {
+	cleanup = func() error {
 		// Comment out below for resetting table
 		// if err := goose.Down(db, "sql"); err != nil {
-		// 	fmt.Println("Error goose:", err)
-		// 	os.Exit(1)
+		//		return err
 		// }
 		if err := db.Close(); err != nil {
-			fmt.Println("Error db.Close:", err)
-			os.Exit(1)
+			return err
 		}
+		return nil
 	}
 
-	return &Store{db}, cleanup
+	return &Store{db}, cleanup, nil
 }
 
 func (s *Store) Create(name, text string) error {
-	_, err := s.db.Exec(`INSERT INTO snippets (name, text) VALUES ($1, $2)`, name, text)
+	_, err := s.db.Exec(`INSERT INTO snippets (name, text) VALUES (?, ?)`, name, text)
 	return err
 }
 
@@ -88,7 +82,7 @@ func (s *Store) ReadAll() ([]store.Snippet, error) {
 }
 
 func (s *Store) Update(snippet store.Snippet) error {
-	_, err := s.db.Exec(`UPDATE snippets SET id = $1, name = $2, text = $3 WHERE id = $1;)`, snippet.Id, snippet.Name, snippet.Text)
+	_, err := s.db.Exec(`UPDATE snippets SET id = ?, name = ?, text = ? WHERE id = ?)`, snippet.Id, snippet.Name, snippet.Text)
 	return err
 }
 
