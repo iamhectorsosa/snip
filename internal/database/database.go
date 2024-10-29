@@ -24,6 +24,8 @@ func New() (store *Store, cleanup func()) {
 		os.Exit(1)
 	}
 
+	goose.SetLogger(goose.NopLogger())
+
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("turso"); err != nil {
 		fmt.Println("Error goose:", err)
@@ -36,9 +38,12 @@ func New() (store *Store, cleanup func()) {
 	}
 
 	cleanup = func() {
-		db.Close()
 		if err := goose.Down(db, "sql"); err != nil {
 			fmt.Println("Error goose:", err)
+			os.Exit(1)
+		}
+		if err := db.Close(); err != nil {
+			fmt.Println("Error db.Close:", err)
 			os.Exit(1)
 		}
 	}
