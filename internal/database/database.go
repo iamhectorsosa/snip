@@ -38,10 +38,11 @@ func New() (store *Store, cleanup func()) {
 	}
 
 	cleanup = func() {
-		if err := goose.Down(db, "sql"); err != nil {
-			fmt.Println("Error goose:", err)
-			os.Exit(1)
-		}
+		// Comment out below for resetting table
+		// if err := goose.Down(db, "sql"); err != nil {
+		// 	fmt.Println("Error goose:", err)
+		// 	os.Exit(1)
+		// }
 		if err := db.Close(); err != nil {
 			fmt.Println("Error db.Close:", err)
 			os.Exit(1)
