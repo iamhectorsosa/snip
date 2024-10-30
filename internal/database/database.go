@@ -6,6 +6,8 @@ import (
 
 	"github.com/iamhectorsosa/snippets/internal/store"
 	"github.com/pressly/goose/v3"
+
+	_ "github.com/tursodatabase/go-libsql"
 )
 
 type Store struct {

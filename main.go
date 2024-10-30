@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	_ "github.com/tursodatabase/go-libsql"
 )
 
 func main() {
