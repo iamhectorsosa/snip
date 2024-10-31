@@ -15,8 +15,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "snip [name] | [name='text']",
-	Short: "Snip is a terminal tool for managing your snippets.",
-	Long: `Snip is a terminal tool for managing your snippets.
+	Short: "Snip is a CLI tool for managing your snippets.",
+	Long: `Snip is a CLI tool for managing your snippets.
 
 To get a snippet, use: snip [name]
 To add snippets, use: snip [name='text']`,
