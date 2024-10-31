@@ -20,11 +20,11 @@ Run the help command to get an updated list of all commands.
 ❯ snip help
 Snip is a CLI tool for managing your snippets.
 
-To get a snippet, use: snip [name] [...$1]
-To add snippets, use: snip [name='text']
+To get a snippet, use: snip [key] [...$1]
+To add snippets, use: snip [key='value']
 
 Usage:
-  snip [name] [...$1] | [name='text'] [flags]
+  snip [key] [...$1] | [key='value'] [flags]
   snip [command]
 
 Available Commands:

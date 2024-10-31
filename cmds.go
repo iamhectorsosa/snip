@@ -149,14 +149,14 @@ var delete = &cobra.Command{
 	Short: "Delete a snippet",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		key := args[0]
 		db, cleanup, err := database.New()
 		defer cleanup()
 		if err != nil {
 			return fmt.Errorf("Error database.New: %v", err)
 		}
 
-		if err = db.Delete(name); err != nil {
+		if err = db.Delete(key); err != nil {
 			return fmt.Errorf("Error Delete: %v", err)
 		}
 

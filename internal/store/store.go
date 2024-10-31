@@ -7,7 +7,7 @@ type Snippet struct {
 }
 
 type Store interface {
-	Create(name, text string) error
+	Create(key, value string) error
 	Read(id int) (Snippet, error)
 	ReadAll() ([]Snippet, error)
 	Update(snippet Snippet) error
