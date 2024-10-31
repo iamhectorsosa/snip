@@ -91,10 +91,10 @@ var list = &cobra.Command{
 		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 		defer writer.Flush()
 
-		fmt.Fprintln(writer, "ID\tName\tText")
+		fmt.Fprintln(writer, "ID\tName\tText\tShare")
 
 		for _, snippet := range snippets {
-			fmt.Fprintf(writer, "%d\t%s\t%s\n", snippet.Id, snippet.Name, snippet.Text)
+			fmt.Fprintf(writer, "%d\t%s\t%s\t%s\n", snippet.Id, snippet.Name, snippet.Text, fmt.Sprintf("%s='%s'", snippet.Name, snippet.Text))
 		}
 
 		return nil
