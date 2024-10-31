@@ -10,20 +10,21 @@ go install github.com/iamhectorsosa/snip@latest
 
 This command installs the binary in your GOBIN directory (default: `~/go/bin`). It also creates a SQLite database file at a fixed location in your home directory: `~/.config/snip/local.db`.
 
+**Note:** This tool is currently implemented only for macOS (Darwin). Support for other operating systems has not been implemented yet.
+
 ## Commands
 
 Run the help command to get an updated list of all commands.
 
 ```bash
 ❯ snip help
+Snip is a CLI tool for managing your snippets.
 
-Snip is a terminal tool for managing your snippets.
-
-To get a snippet, use: snip [name]
+To get a snippet, use: snip [name] [...$1]
 To add snippets, use: snip [name='text']
 
 Usage:
-  snip [name] | [name='text'] [flags]
+  snip [name] [...$1] | [name='text'] [flags]
   snip [command]
 
 Available Commands:

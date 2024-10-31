@@ -14,15 +14,15 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "snip [name] | [name='text']",
+	Use:   "snip [name] [...$1] | [name='text']",
 	Short: "Snip is a CLI tool for managing your snippets.",
 	Long: `Snip is a CLI tool for managing your snippets.
 
-To get a snippet, use: snip [name]
+To get a snippet, use: snip [name] [...$1]
 To add snippets, use: snip [name='text']`,
-	Args: cobra.MaximumNArgs(1),
+	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 1 {
+		if len(args) >= 1 {
 			input := args[0]
 			if strings.Contains(input, "=") {
 				inputSlice := strings.SplitN(input, "=", 2)
@@ -58,13 +58,19 @@ To add snippets, use: snip [name='text']`,
 				return fmt.Errorf("Error Read: %v", err)
 			}
 
-			cmd := exec.Command("pbcopy")
-			cmd.Stdin = bytes.NewReader([]byte(snippet.Text))
-			if err := cmd.Run(); err != nil {
-				return fmt.Errorf("Error cmd.Run: %v", err)
+			text := snippet.Text
+			for i, arg := range args[1:] {
+				placeholder := fmt.Sprintf("$%d", i+1)
+				text = strings.ReplaceAll(text, placeholder, arg)
 			}
 
-			fmt.Printf("Copied to clipboard: %q\n", snippet.Text)
+			cmd := exec.Command("pbcopy")
+			cmd.Stdin = bytes.NewReader([]byte(text))
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("Error pbcopy in cmd.Run: %v", err)
+			}
+
+			fmt.Printf("Copied to clipboard: %q\n", text)
 			return nil
 		} else {
 			return cmd.Help()
