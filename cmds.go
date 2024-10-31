@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/iamhectorsosa/snippets/internal/database"
 	"github.com/iamhectorsosa/snippets/internal/store"
@@ -11,23 +12,45 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "snippets [name]",
-	Short: "Snippets is a terminal tool for managing your snippets",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
-			return fmt.Errorf("Can only provide a maximum of one arguments: %v", err)
-		}
-		return nil
-	},
+	Use:   "snippets  [name] | [name='text']",
+	Short: "Snippets is a terminal tool for managing your snippets.",
+	Long: `Snippets is a terminal tool for managing your snippets.
+
+To get a snippet, use: snippets [name].
+To add snippets, use: snippets [name='text'].`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {
-			name := args[0]
+			input := args[0]
+			if strings.Contains(input, "=") {
+				inputSlice := strings.SplitN(input, "=", 2)
+				if len(inputSlice) != 2 {
+					return fmt.Errorf("Invalid format. Use: name='text'")
+				}
+
+				name := inputSlice[0]
+				text := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
+
+				db, cleanup, err := database.New()
+				defer cleanup()
+				if err != nil {
+					return fmt.Errorf("Error database.New: %v", err)
+				}
+
+				if err = db.Create(name, text); err != nil {
+					return fmt.Errorf("Error Create: %v", err)
+				}
+
+				return nil
+			}
+
 			db, cleanup, err := database.New()
 			defer cleanup()
 			if err != nil {
 				return fmt.Errorf("Error database.New: %v", err)
 			}
 
+			name := input
 			snippet, err := db.Read(name)
 			if err != nil {
 				return fmt.Errorf("Error Read: %v", err)
@@ -44,31 +67,6 @@ var rootCmd = &cobra.Command{
 		} else {
 			return cmd.Help()
 		}
-	},
-}
-
-var add = &cobra.Command{
-	Use:   "add [name] [text]",
-	Short: "Add a snippet",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MinimumNArgs(2)(cmd, args); err != nil {
-			return fmt.Errorf("Need to provide a minimum of two arguments: %v", err)
-		}
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		name, text := args[0], args[1]
-		db, cleanup, err := database.New()
-		defer cleanup()
-		if err != nil {
-			return fmt.Errorf("Error database.New: %v", err)
-		}
-
-		if err = db.Create(name, text); err != nil {
-			return fmt.Errorf("Error Create: %v", err)
-		}
-
-		return nil
 	},
 }
 
@@ -96,16 +94,19 @@ var list = &cobra.Command{
 }
 
 var update = &cobra.Command{
-	Use:   "update [name] [text]",
+	Use:   "update [name='new_text']",
 	Short: "Update a snipppet",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MinimumNArgs(2)(cmd, args); err != nil {
-			return fmt.Errorf("Need to provide a minimum of 2 arguments: %v", err)
-		}
-		return nil
-	},
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name, text := args[0], args[1]
+		input := args[0]
+		inputSlice := strings.SplitN(input, "=", 2)
+		if len(inputSlice) != 2 {
+			return fmt.Errorf("Invalid format. Use: name='next_text'")
+		}
+
+		name := inputSlice[0]
+		newText := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
+
 		db, cleanup, err := database.New()
 		defer cleanup()
 		if err != nil {
@@ -120,7 +121,7 @@ var update = &cobra.Command{
 		if err = db.Update(store.Snippet{
 			Id:   snippet.Id,
 			Name: name,
-			Text: text,
+			Text: newText,
 		}); err != nil {
 			return fmt.Errorf("Error Update: %v", err)
 		}
@@ -132,12 +133,7 @@ var update = &cobra.Command{
 var delete = &cobra.Command{
 	Use:   "delete [name]",
 	Short: "Delete a snippet",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-			return fmt.Errorf("Need to provide a minimum of 1 arguments: %v", err)
-		}
-		return nil
-	},
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		db, cleanup, err := database.New()
@@ -155,7 +151,6 @@ var delete = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(add)
 	rootCmd.AddCommand(list)
 	rootCmd.AddCommand(update)
 	rootCmd.AddCommand(delete)
