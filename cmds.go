@@ -43,6 +43,7 @@ To add snippets, use: snip [key='value']`,
 					return fmt.Errorf("Error Create: %v", err)
 				}
 
+				fmt.Printf("Snippet successfully created, key: %s.\n", key)
 				return nil
 			}
 
@@ -140,6 +141,7 @@ var update = &cobra.Command{
 			return fmt.Errorf("Error Update: %v", err)
 		}
 
+		fmt.Printf("Snippet successfully updated, key: %s.\n", key)
 		return nil
 	},
 }
@@ -160,6 +162,7 @@ var delete = &cobra.Command{
 			return fmt.Errorf("Error Delete: %v", err)
 		}
 
+		fmt.Printf("Snippet successfully deleted, key: %s.\n", key)
 		return nil
 	},
 }
