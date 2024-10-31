@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/iamhectorsosa/snippets/internal/database"
 	"github.com/iamhectorsosa/snippets/internal/store"
@@ -86,9 +88,15 @@ var list = &cobra.Command{
 			return fmt.Errorf("Error ReadAll: %v", err)
 		}
 
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+		defer writer.Flush()
+
+		fmt.Fprintln(writer, "ID\tName\tText")
+
 		for _, snippet := range snippets {
-			fmt.Println(snippet.Id, snippet.Name, snippet.Text)
+			fmt.Fprintf(writer, "%d\t%s\t%s\n", snippet.Id, snippet.Name, snippet.Text)
 		}
+
 		return nil
 	},
 }
