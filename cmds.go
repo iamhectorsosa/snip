@@ -14,12 +14,12 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "snippets  [name] | [name='text']",
+	Use:   "snip [name] | [name='text']",
 	Short: "Snippets is a terminal tool for managing your snippets.",
 	Long: `Snippets is a terminal tool for managing your snippets.
 
-To get a snippet, use: snippets [name].
-To add snippets, use: snippets [name='text'].`,
+To get a snippet, use: snip [name]
+To add snippets, use: snip [name='text']`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {

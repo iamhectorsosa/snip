@@ -4,7 +4,7 @@ all:
 	@echo "**********************************************************"
 
 build:
-	CGO_ENABLED=1 go build -v -o snippets .
+	CGO_ENABLED=1 go build -v -o snip .
 
 test:
 	go test ./... -cover
