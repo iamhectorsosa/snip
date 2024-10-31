@@ -39,7 +39,7 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("Error cmd.Run: %v", err)
 			}
 
-			fmt.Printf("Copied to clipboard: %q\n", name)
+			fmt.Printf("Copied to clipboard: %q\n", snippet.Text)
 			return nil
 		} else {
 			return cmd.Help()
