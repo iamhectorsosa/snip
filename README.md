@@ -1,11 +1,11 @@
-# Snippets
+# Snippets (snip)
 
-Snippets is a command-line tool for managing your code snippets using a local SQLite database.
+Snippets (snip) is a command-line tool for managing your code snippets using a local SQLite database.
 
 ## Usage
 
 ```bash
-go install github.com/iamhectorsosa/snippets@latest
+go install github.com/iamhectorsosa/snip@latest
 ```
 
 ## Installation
@@ -13,8 +13,8 @@ go install github.com/iamhectorsosa/snippets@latest
 1. Clone the repository:
 
 ```bash
-git clone github.com/iamhectorsosa/snippets
-cd snippets
+git clone github.com/iamhectorsosa/snip
+cd snip
 ```
 
 2. Build the project:

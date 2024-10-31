@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"github.com/iamhectorsosa/snippets/internal/store"
+	"github.com/iamhectorsosa/snip/internal/store"
 
 	_ "github.com/tursodatabase/go-libsql"
 )

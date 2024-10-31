@@ -1,4 +1,4 @@
-module github.com/iamhectorsosa/snippets
+module github.com/iamhectorsosa/snip
 
 go 1.23.2
 

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/iamhectorsosa/snippets/internal/database"
-	"github.com/iamhectorsosa/snippets/internal/store"
+	"github.com/iamhectorsosa/snip/internal/database"
+	"github.com/iamhectorsosa/snip/internal/store"
 	"github.com/spf13/cobra"
 )
 
