@@ -8,8 +8,8 @@ type Snippet struct {
 
 type Store interface {
 	Create(key, value string) error
-	Read(id int) (Snippet, error)
+	Read(key string) (Snippet, error)
 	ReadAll() ([]Snippet, error)
 	Update(snippet Snippet) error
-	Delete(id int) error
+	Delete(key string) error
 }
