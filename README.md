@@ -1,6 +1,6 @@
-# Snippets (snip)
+# Snip (snippets)
 
-Snippets (snip) is a command-line tool for managing your code snippets using a local SQLite database.
+Snip (snippets) is a command-line tool for managing your snippets using a local SQLite database.
 
 ## Usage
 
@@ -17,7 +17,7 @@ Run the help command to get an updated list of all commands.
 ```bash
 ❯ snip help
 
-Snippets is a terminal tool for managing your snippets.
+Snip is a terminal tool for managing your snippets.
 
 To get a snippet, use: snip [name]
 To add snippets, use: snip [name='text']
