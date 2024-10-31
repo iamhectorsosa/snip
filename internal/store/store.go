@@ -1,9 +1,9 @@
 package store
 
 type Snippet struct {
-	Id   int
-	Name string
-	Text string
+	Id    int
+	Key   string
+	Value string
 }
 
 type Store interface {

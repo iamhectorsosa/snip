@@ -14,12 +14,12 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "snip [name] [...$1] | [name='text']",
+	Use:   "snip [key] [...$1] | [key='value']",
 	Short: "Snip is a CLI tool for managing your snippets.",
 	Long: `Snip is a CLI tool for managing your snippets.
 
-To get a snippet, use: snip [name] [...$1]
-To add snippets, use: snip [name='text']`,
+To get a snippet, use: snip [key] [...$1]
+To add snippets, use: snip [key='value']`,
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) >= 1 {
@@ -27,11 +27,11 @@ To add snippets, use: snip [name='text']`,
 			if strings.Contains(input, "=") {
 				inputSlice := strings.SplitN(input, "=", 2)
 				if len(inputSlice) != 2 {
-					return fmt.Errorf("Invalid format. Use: name='text'")
+					return fmt.Errorf("Invalid format. Use: key='value'")
 				}
 
-				name := inputSlice[0]
-				text := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
+				key := inputSlice[0]
+				value := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
 
 				db, cleanup, err := database.New()
 				defer cleanup()
@@ -39,7 +39,7 @@ To add snippets, use: snip [name='text']`,
 					return fmt.Errorf("Error database.New: %v", err)
 				}
 
-				if err = db.Create(name, text); err != nil {
+				if err = db.Create(key, value); err != nil {
 					return fmt.Errorf("Error Create: %v", err)
 				}
 
@@ -52,25 +52,25 @@ To add snippets, use: snip [name='text']`,
 				return fmt.Errorf("Error database.New: %v", err)
 			}
 
-			name := input
-			snippet, err := db.Read(name)
+			key := input
+			snippet, err := db.Read(key)
 			if err != nil {
 				return fmt.Errorf("Error Read: %v", err)
 			}
 
-			text := snippet.Text
+			value := snippet.Value
 			for i, arg := range args[1:] {
 				placeholder := fmt.Sprintf("$%d", i+1)
-				text = strings.ReplaceAll(text, placeholder, arg)
+				value = strings.ReplaceAll(value, placeholder, arg)
 			}
 
 			cmd := exec.Command("pbcopy")
-			cmd.Stdin = bytes.NewReader([]byte(text))
+			cmd.Stdin = bytes.NewReader([]byte(value))
 			if err := cmd.Run(); err != nil {
 				return fmt.Errorf("Error pbcopy in cmd.Run: %v", err)
 			}
 
-			fmt.Printf("Copied to clipboard: %q\n", text)
+			fmt.Printf("Copied to clipboard: %q\n", value)
 			return nil
 		} else {
 			return cmd.Help()
@@ -97,10 +97,10 @@ var ls = &cobra.Command{
 		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', 0)
 		defer writer.Flush()
 
-		fmt.Fprintln(writer, "Name\tSnippet")
+		fmt.Fprintln(writer, "Key\tValue")
 
 		for _, snippet := range snippets {
-			fmt.Fprintf(writer, "%s\t%s\n", snippet.Name, snippet.Text)
+			fmt.Fprintf(writer, "%s\t%s\n", snippet.Key, snippet.Value)
 		}
 
 		return nil
@@ -108,18 +108,18 @@ var ls = &cobra.Command{
 }
 
 var update = &cobra.Command{
-	Use:   "update [name='new_text']",
+	Use:   "update [key='new_value']",
 	Short: "Update a snipppet",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		input := args[0]
 		inputSlice := strings.SplitN(input, "=", 2)
 		if len(inputSlice) != 2 {
-			return fmt.Errorf("Invalid format. Use: name='new_text'")
+			return fmt.Errorf("Invalid format. Use: key='new_value'")
 		}
 
-		name := inputSlice[0]
-		newText := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
+		key := inputSlice[0]
+		newValue := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
 
 		db, cleanup, err := database.New()
 		defer cleanup()
@@ -127,15 +127,15 @@ var update = &cobra.Command{
 			return fmt.Errorf("Error database.New: %v", err)
 		}
 
-		snippet, err := db.Read(name)
+		snippet, err := db.Read(key)
 		if err != nil {
 			return fmt.Errorf("Error Read: %v", err)
 		}
 
 		if err = db.Update(store.Snippet{
-			Id:   snippet.Id,
-			Name: name,
-			Text: newText,
+			Id:    snippet.Id,
+			Key:   key,
+			Value: newValue,
 		}); err != nil {
 			return fmt.Errorf("Error Update: %v", err)
 		}
@@ -145,7 +145,7 @@ var update = &cobra.Command{
 }
 
 var delete = &cobra.Command{
-	Use:   "delete [name]",
+	Use:   "delete [key]",
 	Short: "Delete a snippet",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

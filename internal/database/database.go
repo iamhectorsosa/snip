@@ -37,24 +37,24 @@ func New() (store *Store, cleanup func() error, err error) {
 		return nil, cleanup, err
 	}
 
-	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS snippets (id INTEGER PRIMARY KEY, name TEXT UNIQUE, text TEXT)`); err != nil {
+	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS snippets (id INTEGER PRIMARY KEY, key TEXT UNIQUE, value TEXT)`); err != nil {
 		return nil, cleanup, err
 	}
 
 	return &Store{db}, cleanup, nil
 }
 
-func (s *Store) Create(name, text string) error {
-	_, err := s.db.Exec(`INSERT INTO snippets (name, text) VALUES (?, ?)`, name, text)
+func (s *Store) Create(key, value string) error {
+	_, err := s.db.Exec(`INSERT INTO snippets (key, value) VALUES (?, ?)`, key, value)
 	return err
 }
 
-func (s *Store) Read(name string) (store.Snippet, error) {
+func (s *Store) Read(key string) (store.Snippet, error) {
 	var snippet store.Snippet
-	err := s.db.QueryRow("SELECT * FROM snippets WHERE name = ?", name).Scan(
+	err := s.db.QueryRow("SELECT * FROM snippets WHERE key = ?", key).Scan(
 		&snippet.Id,
-		&snippet.Name,
-		&snippet.Text,
+		&snippet.Key,
+		&snippet.Value,
 	)
 	return snippet, err
 }
@@ -68,7 +68,7 @@ func (s *Store) ReadAll() ([]store.Snippet, error) {
 	var snippets []store.Snippet
 	for rows.Next() {
 		var snippet store.Snippet
-		if err := rows.Scan(&snippet.Id, &snippet.Name, &snippet.Text); err != nil {
+		if err := rows.Scan(&snippet.Id, &snippet.Key, &snippet.Value); err != nil {
 			return nil, err
 		}
 		snippets = append(snippets, snippet)
@@ -80,11 +80,11 @@ func (s *Store) ReadAll() ([]store.Snippet, error) {
 }
 
 func (s *Store) Update(snippet store.Snippet) error {
-	_, err := s.db.Exec(`UPDATE snippets SET name = ?, text = ? WHERE id = ?`, snippet.Name, snippet.Text, snippet.Id)
+	_, err := s.db.Exec(`UPDATE snippets SET key = ?, value = ? WHERE key = ?`, snippet.Key, snippet.Value, snippet.Key)
 	return err
 }
 
-func (s *Store) Delete(name string) error {
-	_, err := s.db.Exec("DELETE FROM snippets WHERE name = ?", name)
+func (s *Store) Delete(Key string) error {
+	_, err := s.db.Exec("DELETE FROM snippets WHERE key = ?", Key)
 	return err
 }
