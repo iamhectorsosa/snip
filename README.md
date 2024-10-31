@@ -2,6 +2,12 @@
 
 Snippets is a command-line tool for managing your code snippets using a local SQLite database.
 
+## Usage
+
+```bash
+go install github.com/iamhectorsosa/snippets@latest
+```
+
 ## Installation
 
 1. Clone the repository:
