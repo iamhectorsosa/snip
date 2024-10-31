@@ -32,7 +32,6 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("Error Read: %v", err)
 			}
-			fmt.Println(snippet.Text)
 
 			cmd := exec.Command("pbcopy")
 			cmd.Stdin = bytes.NewReader([]byte(snippet.Text))
@@ -40,6 +39,7 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("Error cmd.Run: %v", err)
 			}
 
+			fmt.Printf("Copied to clipboard: %q\n", name)
 			return nil
 		} else {
 			return cmd.Help()
