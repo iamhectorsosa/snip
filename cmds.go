@@ -1,8 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"strconv"
+	"os/exec"
 
 	"github.com/iamhectorsosa/snippets/internal/database"
 	"github.com/iamhectorsosa/snippets/internal/store"
@@ -10,11 +11,39 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "snippets [command]",
+	Use:   "snippets [name]",
 	Short: "Snippets is a terminal tool for managing your snippets",
-	Args:  cobra.NoArgs,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
+			return fmt.Errorf("Can only provide a maximum of one arguments: %v", err)
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return cmd.Help()
+		if len(args) == 1 {
+			name := args[0]
+			db, cleanup, err := database.New()
+			defer cleanup()
+			if err != nil {
+				return fmt.Errorf("Error database.New: %v", err)
+			}
+
+			snippet, err := db.Read(name)
+			if err != nil {
+				return fmt.Errorf("Error Read: %v", err)
+			}
+			fmt.Println(snippet.Text)
+
+			cmd := exec.Command("pbcopy")
+			cmd.Stdin = bytes.NewReader([]byte(snippet.Text))
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("Error cmd.Run: %v", err)
+			}
+
+			return nil
+		} else {
+			return cmd.Help()
+		}
 	},
 }
 
@@ -29,49 +58,16 @@ var add = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name, text := args[0], args[1]
-
 		db, cleanup, err := database.New()
+		defer cleanup()
 		if err != nil {
 			return fmt.Errorf("Error database.New: %v", err)
 		}
-		defer cleanup()
 
-		err = db.Create(name, text)
-		if err != nil {
+		if err = db.Create(name, text); err != nil {
 			return fmt.Errorf("Error Create: %v", err)
 		}
-		return nil
-	},
-}
 
-var view = &cobra.Command{
-	Use:   "view [id]",
-	Short: "View a snipppet",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-			return fmt.Errorf("Need to provide a minimum of 1 arguments: %v", err)
-		}
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		idStr := args[0]
-		db, cleanup, err := database.New()
-		if err != nil {
-			return fmt.Errorf("Error database.New: %v", err)
-		}
-		defer cleanup()
-
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			return fmt.Errorf("Error Atoi: %v", err)
-		}
-
-		snippet, err := db.Read(id)
-		if err != nil {
-			return fmt.Errorf("Error Read: %v", err)
-		}
-
-		fmt.Println(snippet.Id, snippet.Name, snippet.Text)
 		return nil
 	},
 }
@@ -82,10 +78,10 @@ var list = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		db, cleanup, err := database.New()
+		defer cleanup()
 		if err != nil {
 			return fmt.Errorf("Error database.New: %v", err)
 		}
-		defer cleanup()
 
 		snippets, err := db.ReadAll()
 		if err != nil {
@@ -100,44 +96,41 @@ var list = &cobra.Command{
 }
 
 var update = &cobra.Command{
-	Use:   "update [id] [name] [text]",
+	Use:   "update [name] [text]",
 	Short: "Update a snipppet",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if err := cobra.MinimumNArgs(3)(cmd, args); err != nil {
-			return fmt.Errorf("Need to provide a minimum of 3 arguments: %v", err)
+		if err := cobra.MinimumNArgs(2)(cmd, args); err != nil {
+			return fmt.Errorf("Need to provide a minimum of 2 arguments: %v", err)
 		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		idStr, name, text := args[0], args[1], args[2]
+		name, text := args[0], args[1]
 		db, cleanup, err := database.New()
+		defer cleanup()
 		if err != nil {
 			return fmt.Errorf("Error database.New: %v", err)
 		}
-		defer cleanup()
 
-		id, err := strconv.Atoi(idStr)
+		snippet, err := db.Read(name)
 		if err != nil {
-			return fmt.Errorf("Error Atoi: %v", err)
+			return fmt.Errorf("Error Read: %v", err)
 		}
 
-		snippet := store.Snippet{Id: id,
+		if err = db.Update(store.Snippet{
+			Id:   snippet.Id,
 			Name: name,
-			Text: text}
-
-		err = db.Update(snippet)
-
-		if err != nil {
+			Text: text,
+		}); err != nil {
 			return fmt.Errorf("Error Update: %v", err)
 		}
 
-		fmt.Println(snippet.Id, snippet.Name, snippet.Text)
 		return nil
 	},
 }
 
 var delete = &cobra.Command{
-	Use:   "delete [id]",
+	Use:   "delete [name]",
 	Short: "Delete a snippet",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
@@ -146,20 +139,14 @@ var delete = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		idStr := args[0]
+		name := args[0]
 		db, cleanup, err := database.New()
+		defer cleanup()
 		if err != nil {
 			return fmt.Errorf("Error database.New: %v", err)
 		}
-		defer cleanup()
 
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			return fmt.Errorf("Error Atoi: %v", err)
-		}
-
-		err = db.Delete(id)
-		if err != nil {
+		if err = db.Delete(name); err != nil {
 			return fmt.Errorf("Error Delete: %v", err)
 		}
 
@@ -169,7 +156,6 @@ var delete = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(add)
-	rootCmd.AddCommand(view)
 	rootCmd.AddCommand(list)
 	rootCmd.AddCommand(update)
 	rootCmd.AddCommand(delete)
