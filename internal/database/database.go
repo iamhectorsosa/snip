@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"os"
+	"path/filepath"
 
 	"github.com/iamhectorsosa/snip/internal/store"
 
@@ -13,7 +15,17 @@ type Store struct {
 }
 
 func New() (store *Store, cleanup func() error, err error) {
-	db, err := sql.Open("libsql", "file:./local.db")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	dbPath := filepath.Join(homeDir, ".config", "snip", "local.db")
+	if err := os.MkdirAll(filepath.Dir(dbPath), os.ModePerm); err != nil {
+		return nil, nil, err
+	}
+
+	db, err := sql.Open("libsql", "file:"+dbPath)
 	cleanup = func() error {
 		if err := db.Close(); err != nil {
 			return err

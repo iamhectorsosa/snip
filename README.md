@@ -8,7 +8,7 @@ Snippets (snip) is a command-line tool for managing your code snippets using a l
 go install github.com/iamhectorsosa/snip@latest
 ```
 
-This command installs the binary in your GOBIN directory (default: `~/go/bin`).
+This command installs the binary in your GOBIN directory (default: `~/go/bin`). It also creates a SQLite database file at a fixed location in your home directory: `~/.config/snip/local.db`.
 
 ## Commands
 
