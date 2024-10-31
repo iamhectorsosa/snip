@@ -30,7 +30,7 @@ Usage:
 Available Commands:
   delete      Delete a snippet
   help        Help about any command
-  list        List all snippets
+  ls          List all snippets
   update      Update a snipppet
 ```
 

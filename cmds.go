@@ -78,8 +78,8 @@ To add snippets, use: snip [name='text']`,
 	},
 }
 
-var list = &cobra.Command{
-	Use:   "list",
+var ls = &cobra.Command{
+	Use:   "ls",
 	Short: "List all snippets",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -94,13 +94,13 @@ var list = &cobra.Command{
 			return fmt.Errorf("Error ReadAll: %v", err)
 		}
 
-		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', 0)
 		defer writer.Flush()
 
-		fmt.Fprintln(writer, "ID\tName\tText\tShare")
+		fmt.Fprintln(writer, "Name\tSnippet")
 
 		for _, snippet := range snippets {
-			fmt.Fprintf(writer, "%d\t%s\t%s\t%s\n", snippet.Id, snippet.Name, snippet.Text, fmt.Sprintf("%s='%s'", snippet.Name, snippet.Text))
+			fmt.Fprintf(writer, "%s\t%s\n", snippet.Name, snippet.Text)
 		}
 
 		return nil
@@ -115,7 +115,7 @@ var update = &cobra.Command{
 		input := args[0]
 		inputSlice := strings.SplitN(input, "=", 2)
 		if len(inputSlice) != 2 {
-			return fmt.Errorf("Invalid format. Use: name='next_text'")
+			return fmt.Errorf("Invalid format. Use: name='new_text'")
 		}
 
 		name := inputSlice[0]
@@ -165,7 +165,7 @@ var delete = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(list)
+	rootCmd.AddCommand(ls)
 	rootCmd.AddCommand(update)
 	rootCmd.AddCommand(delete)
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
