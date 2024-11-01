@@ -14,7 +14,9 @@ go install github.com/iamhectorsosa/snip@latest
 
 **Note:** This tool is currently implemented only for macOS (Darwin). Support for other operating systems has not been implemented yet.
 
-Manage snippets with the same known patterns as aliases. Calling snippets automatically copies them to your system clipboard. Snip can be import and exported from CSV files, supporting both local and remote CSV files for flexibility. Here are some basic commands:
+Manage snippets with the same known patterns as aliases. Calling snippets automatically copies them to your system clipboard. Snip can import and export from/to CSV, supporting both local and remote paths/URLs for flexibility.
+
+Here are some basic commands:
 
 ```bash
 # Creates a snippet
@@ -22,9 +24,9 @@ snip [key='value']
 # Calls a snippets
 snip [key]
 # Export snippets
-snip export -p ~/
+snip export --path ~/
 # Import snippets
-snip import -url https://gist..
+snip import --url https://gist..
 ```
 
 ## Commands
