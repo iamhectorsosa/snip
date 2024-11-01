@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
-	"text/tabwriter"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/iamhectorsosa/snip/internal/database"
+	"github.com/iamhectorsosa/snip/internal/logger"
 	"github.com/iamhectorsosa/snip/internal/store"
 	"github.com/spf13/cobra"
 )
@@ -22,12 +22,13 @@ To get a snippet, use: snip [key] [...$1]
 To add snippets, use: snip [key='value']`,
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log := logger.New()
 		if len(args) >= 1 {
 			input := args[0]
 			if strings.Contains(input, "=") {
 				inputSlice := strings.SplitN(input, "=", 2)
 				if len(inputSlice) != 2 {
-					return fmt.Errorf("Invalid format. Use: key='value'")
+					return log.Error("invalid format. Use: key='value'")
 				}
 
 				key := inputSlice[0]
@@ -36,27 +37,27 @@ To add snippets, use: snip [key='value']`,
 				db, cleanup, err := database.New()
 				defer cleanup()
 				if err != nil {
-					return fmt.Errorf("Error database.New: %v", err)
+					return log.Error("database.New: %v", err)
 				}
 
 				if err = db.Create(key, value); err != nil {
-					return fmt.Errorf("Error Create: %v", err)
+					return log.Error("db.Create: %v", err)
 				}
 
-				fmt.Printf("Snippet successfully created, key: %s.\n", key)
+				log.Info("Snippet successfully created, key=%q value=%q.", key, value)
 				return nil
 			}
 
 			db, cleanup, err := database.New()
 			defer cleanup()
 			if err != nil {
-				return fmt.Errorf("Error database.New: %v", err)
+				return log.Error("database.New: %v", err)
 			}
 
 			key := input
 			snippet, err := db.Read(key)
 			if err != nil {
-				return fmt.Errorf("Error Read: %v", err)
+				return log.Error("db.Read: err=%v", err)
 			}
 
 			value := snippet.Value
@@ -68,10 +69,10 @@ To add snippets, use: snip [key='value']`,
 			cmd := exec.Command("pbcopy")
 			cmd.Stdin = bytes.NewReader([]byte(value))
 			if err := cmd.Run(); err != nil {
-				return fmt.Errorf("Error pbcopy in cmd.Run: %v", err)
+				return log.Error("pbcopy in cmd.Run: %v", err)
 			}
 
-			fmt.Printf("Copied to clipboard: %q\n", value)
+			log.Info("Copied to clipboard: value=%q", value)
 			return nil
 		} else {
 			return cmd.Help()
@@ -84,24 +85,45 @@ var ls = &cobra.Command{
 	Short: "List all snippets",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log := logger.New()
 		db, cleanup, err := database.New()
 		defer cleanup()
 		if err != nil {
-			return fmt.Errorf("Error database.New: %v", err)
+			return log.Error("database.New: %v", err)
 		}
 
 		snippets, err := db.ReadAll()
 		if err != nil {
-			return fmt.Errorf("Error ReadAll: %v", err)
+			return log.Error("db.ReadAll: %v", err)
 		}
 
-		writer := tabwriter.NewWriter(os.Stdout, 0, 8, 2, '\t', 0)
-		defer writer.Flush()
+		log.Info("Found %d snippets...", len(snippets))
 
-		fmt.Fprintln(writer, "Key\tValue")
+		maxKeyLen, maxValueLen := 0, 0
+		for _, s := range snippets {
+			if len(s.Key) > maxKeyLen {
+				maxKeyLen = len(s.Key) + 6
+			}
+			if len(s.Value) > maxValueLen {
+				maxValueLen = len(s.Value)
+			}
+		}
 
-		for _, snippet := range snippets {
-			fmt.Fprintf(writer, "%s\t%s\n", snippet.Key, snippet.Value)
+		snippets = append([]store.Snippet{store.Snippet{
+			Id:    0,
+			Key:   "KEY",
+			Value: "VALUE",
+		}}, snippets...)
+
+		evenStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+		for i, s := range snippets {
+			key := fmt.Sprintf("%-*s", maxKeyLen, s.Key)
+			value := fmt.Sprintf("%-*s", maxValueLen, s.Value)
+			if i%2 == 0 {
+				key = evenStyle.Render(key)
+				value = evenStyle.Render(value)
+			}
+			fmt.Println(key, value)
 		}
 
 		return nil
@@ -113,10 +135,11 @@ var update = &cobra.Command{
 	Short: "Update a snipppet",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log := logger.New()
 		input := args[0]
 		inputSlice := strings.SplitN(input, "=", 2)
 		if len(inputSlice) != 2 {
-			return fmt.Errorf("Invalid format. Use: key='new_value'")
+			return log.Error("invalid format. Use: key='new_value'")
 		}
 
 		key := inputSlice[0]
@@ -125,12 +148,12 @@ var update = &cobra.Command{
 		db, cleanup, err := database.New()
 		defer cleanup()
 		if err != nil {
-			return fmt.Errorf("Error database.New: %v", err)
+			return log.Error("database.New: %v", err)
 		}
 
 		snippet, err := db.Read(key)
 		if err != nil {
-			return fmt.Errorf("Error Read: %v", err)
+			return log.Error("db.Read: %v", err)
 		}
 
 		if err = db.Update(store.Snippet{
@@ -138,10 +161,10 @@ var update = &cobra.Command{
 			Key:   key,
 			Value: newValue,
 		}); err != nil {
-			return fmt.Errorf("Error Update: %v", err)
+			return log.Error("db.Update: %v", err)
 		}
 
-		fmt.Printf("Snippet successfully updated, key: %s.\n", key)
+		log.Info("Snippet successfully updated, key=%q value=%q.", key, newValue)
 		return nil
 	},
 }
@@ -151,18 +174,19 @@ var delete = &cobra.Command{
 	Short: "Delete a snippet",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log := logger.New()
 		key := args[0]
 		db, cleanup, err := database.New()
 		defer cleanup()
 		if err != nil {
-			return fmt.Errorf("Error database.New: %v", err)
+			return log.Error("database.New: %v", err)
 		}
 
 		if err = db.Delete(key); err != nil {
-			return fmt.Errorf("Error Delete: %v", err)
+			return log.Error("db.Delete: %v", err)
 		}
 
-		fmt.Printf("Snippet successfully deleted, key: %s.\n", key)
+		log.Info("Snippet successfully deleted, key=%q.", key)
 		return nil
 	},
 }
@@ -172,4 +196,6 @@ func init() {
 	rootCmd.AddCommand(update)
 	rootCmd.AddCommand(delete)
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	rootCmd.SilenceUsage = true
+	rootCmd.SilenceErrors = true
 }
