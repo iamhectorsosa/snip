@@ -1,5 +1,7 @@
 # Snip
 
+![demo](./demo.gif)
+
 Snip (snippets) is a command-line tool for managing your snippets using a local SQLite database.
 
 ## Usage
