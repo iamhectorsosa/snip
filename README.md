@@ -14,6 +14,19 @@ go install github.com/iamhectorsosa/snip@latest
 
 **Note:** This tool is currently implemented only for macOS (Darwin). Support for other operating systems has not been implemented yet.
 
+Manage snippets with the same known patterns as aliases. Calling snippets automatically copies them to your system clipboard. Snip can be import and exported from CSV files, supporting both local and remote CSV files for flexibility. Here are some basic commands:
+
+```bash
+# Creates a snippet
+snip [key='value']
+# Calls a snippets
+snip [key]
+# Export snippets
+snip export -p ~/
+# Import snippets
+snip import -url https://gist..
+```
+
 ## Commands
 
 Run the help command to get an updated list of all commands.
@@ -31,8 +44,11 @@ Usage:
 
 Available Commands:
   delete      Delete a snippet
+  export      Export all snippets
   help        Help about any command
+  import      Import snippets
   ls          List all snippets
+  reset       Reset all snippets
   update      Update a snipppet
 ```
 

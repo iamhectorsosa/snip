@@ -88,3 +88,27 @@ func (s *Store) Delete(Key string) error {
 	_, err := s.db.Exec("DELETE FROM snippets WHERE key = ?", Key)
 	return err
 }
+
+func (s *Store) Reset() error {
+	_, err := s.db.Exec("DELETE FROM snippets")
+	return err
+}
+
+func (s *Store) Import(snippets []store.Snippet) error {
+	if len(snippets) == 0 {
+		return nil
+	}
+
+	insertQuery := "INSERT OR IGNORE INTO snippets (key, value) VALUES "
+	var args []interface{}
+	for i, snippet := range snippets {
+		if i > 0 {
+			insertQuery += ", "
+		}
+		insertQuery += "(?, ?)"
+		args = append(args, snippet.Key, snippet.Value)
+	}
+
+	_, err := s.db.Exec(insertQuery, args...)
+	return err
+}

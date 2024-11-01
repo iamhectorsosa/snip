@@ -12,4 +12,6 @@ type Store interface {
 	ReadAll() ([]Snippet, error)
 	Update(snippet Snippet) error
 	Delete(key string) error
+	Reset() error
+	Import([]Snippet) error
 }
