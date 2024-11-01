@@ -59,7 +59,7 @@ Available Commands:
 1. Clone the repository:
 
 ```bash
-git clone github.com/iamhectorsosa/snip
+gh repo clone iamhectorsosa/snip
 cd snip
 ```
 
