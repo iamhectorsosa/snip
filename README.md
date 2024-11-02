@@ -22,13 +22,27 @@ Here are some basic commands:
 
 ```bash
 # Creates a snippet
-snip [key='value']
+❯ snip [key='value']
+
 # Calls a snippets
-snip [key]
+❯ snip [key]
+
 # Export snippets
-snip export --path ~/
+❯ snip export --path ~/
+
 # Import snippets
-snip import --url https://gist..
+❯ snip import --url https://gist..
+
+# List of snippets
+❯ snip ls
+SNIP Found 6 snippets...
+KEY          VALUE
+grep-s       grep -rn "$1" .
+gh-rm-b      git branch | grep -v "^\*" | xargs git branch -d
+gh-config    git config --list | grep -E "user.email|user.name|user.signingkey|commit.gpgsign"
+ls-h         ls -d .*
+gh-rm        rm -rf .git
+go-bin       ls -l ~/go/bin
 ```
 
 ## Commands
