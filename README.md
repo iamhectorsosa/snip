@@ -1,5 +1,7 @@
 # Snip
 
+![code coverage badge](https://github.com/iamhectorsosa/snip/actions/workflows/ci.yml/badge.svg)
+
 Snip (snippets) is a command-line tool for managing your snippets using a local SQLite database.
 
 ![demo](./demo.gif)
