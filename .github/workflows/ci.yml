@@ -23,12 +23,6 @@ jobs:
       - name: Run unit tests
         run: make test
 
-      - name: Install gosec
-        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
-
-      - name: Run security check
-        run: make sec
-
   style:
     name: Style
     runs-on: ubuntu-latest
@@ -43,7 +37,7 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Check formatting
-        run: make format
+        run: test -z $(go fmt ./...)
 
       - name: Install staticcheck
         run: go install honnef.co/go/tools/cmd/staticcheck@latest

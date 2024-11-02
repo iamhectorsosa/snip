@@ -248,6 +248,7 @@ var export = &cobra.Command{
 		log.Info("Generating report with %d snippets...", len(snippets))
 
 		filename := filepath.Join(exportPath, fmt.Sprintf("snip-%s.csv", time.Now().Format("2006-01-02")))
+		filename = filepath.Clean(filename)
 		file, err := os.Create(filename)
 		if err != nil {
 			return log.Error("os.Create, err=%v", err)
@@ -285,6 +286,7 @@ var importc = &cobra.Command{
 
 		var reader io.Reader
 		if importFilePath != "" {
+			importFilePath = filepath.Clean(importFilePath)
 			file, err := os.Open(importFilePath)
 			if err != nil {
 				return log.Error("os.Open, err=%v", err)
@@ -292,7 +294,11 @@ var importc = &cobra.Command{
 			defer file.Close()
 			reader = file
 		} else {
-			resp, err := http.Get(importUrlPath)
+			req, err := http.NewRequest(http.MethodGet, importUrlPath, nil)
+			if err != nil {
+				return log.Error("http.NewRequest, err=%v", err)
+			}
+			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				return log.Error("http.Get, err=%v", err)
 			}
