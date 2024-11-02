@@ -41,10 +41,10 @@ To add snippets, use: snip [key='value']`,
 				value := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
 
 				db, cleanup, err := database.New()
-				defer cleanup()
 				if err != nil {
 					return log.Error("database.New, err=%v", err)
 				}
+				defer cleanup()
 
 				if err = db.Create(key, value); err != nil {
 					return log.Error("db.Create, err=%v", err)
@@ -55,10 +55,10 @@ To add snippets, use: snip [key='value']`,
 			}
 
 			db, cleanup, err := database.New()
-			defer cleanup()
 			if err != nil {
 				return log.Error("database.New, err=%v", err)
 			}
+			defer cleanup()
 
 			key := input
 			snippet, err := db.Read(key)
@@ -93,10 +93,10 @@ var ls = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log := logger.New()
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		snippets, err := db.ReadAll()
 		if err != nil {
@@ -156,10 +156,10 @@ var update = &cobra.Command{
 		newValue := strings.TrimSpace(strings.Trim(inputSlice[1], "'"))
 
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		snippet, err := db.Read(key)
 		if err != nil {
@@ -187,10 +187,10 @@ var delete = &cobra.Command{
 		log := logger.New()
 		key := args[0]
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		if err = db.Delete(key); err != nil {
 			return log.Error("db.Delete, err=%v", err)
@@ -208,10 +208,10 @@ var reset = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log := logger.New()
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		if err = db.Reset(); err != nil {
 			return log.Error("db.Reset, err=%v", err)
@@ -235,10 +235,10 @@ var export = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		log := logger.New()
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		snippets, err := db.ReadAll()
 		if err != nil {
@@ -327,10 +327,10 @@ var importc = &cobra.Command{
 		}
 
 		db, cleanup, err := database.New()
-		defer cleanup()
 		if err != nil {
 			return log.Error("database.New, err=%v", err)
 		}
+		defer cleanup()
 
 		if err := db.Import(snippets); err != nil {
 			return log.Error("db.Import, err=%v", err)

@@ -26,21 +26,28 @@ func New() (store *Store, cleanup func() error, err error) {
 	}
 
 	db, err := sql.Open("libsql", "file:"+dbPath)
-	cleanup = func() error {
-		if err := db.Close(); err != nil {
-			return err
-		}
-		return nil
-	}
-
 	if err != nil {
-		return nil, cleanup, err
+		return nil, nil, err
 	}
 
+	cleanup = db.Close
 	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS snippets (id INTEGER PRIMARY KEY, key TEXT UNIQUE, value TEXT)`); err != nil {
 		return nil, cleanup, err
 	}
 
+	return &Store{db}, cleanup, nil
+}
+
+func NewInMemory() (store *Store, cleanup func() error, err error) {
+	db, err := sql.Open("libsql", ":memory:")
+	if err != nil {
+		return nil, nil, err
+	}
+	cleanup = db.Close
+
+	if _, err = db.Exec(`CREATE TABLE IF NOT EXISTS snippets (id INTEGER PRIMARY KEY, key TEXT UNIQUE, value TEXT)`); err != nil {
+		return nil, cleanup, err
+	}
 	return &Store{db}, cleanup, nil
 }
 
