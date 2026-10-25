@@ -1,5 +1,7 @@
 # Snip ✂️
 
+![Snip Demo](./demo.gif)
+
 Snip is a dead simple CLI tool that manages shell snippets as zsh aliases and functions, and copies them to your clipboard on demand.
 
 Ideal for keeping long commands one short key away.
