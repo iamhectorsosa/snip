@@ -35,3 +35,57 @@ func TestLoadMissingFile(t *testing.T) {
 		t.Fatalf("got %v, %v", ss, err)
 	}
 }
+
+func TestPaths(t *testing.T) {
+	const home = "/home/user"
+	defaultFile := "/home/user/.config/snip/snippets.sh"
+
+	cases := []struct {
+		name     string
+		env      map[string]string
+		wantFile string
+		wantRC   string
+		wantErr  string
+	}{
+		{
+			name:     "default file and rc",
+			env:      map[string]string{"SHELL": "/bin/zsh"},
+			wantFile: defaultFile,
+			wantRC:   "/home/user/.zshrc",
+		},
+		{
+			name:     "SNIP_FILE and SNIP_RC overrides honoured",
+			env:      map[string]string{"SHELL": "/bin/zsh", "SNIP_FILE": "/x/file", "SNIP_RC": "/x/rc"},
+			wantFile: "/x/file",
+			wantRC:   "/x/rc",
+		},
+		{
+			name:    "unsupported shell errors even with overrides set",
+			env:     map[string]string{"SHELL": "/usr/bin/fish", "SNIP_FILE": "/x/file", "SNIP_RC": "/x/rc"},
+			wantErr: "unsupported",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			t.Setenv("HOME", home)
+			for _, k := range []string{"SHELL", "SNIP_SHELL", "SNIP_FILE", "SNIP_RC"} {
+				t.Setenv(k, c.env[k])
+			}
+
+			file, rc, err := Paths()
+			if c.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), c.wantErr) {
+					t.Fatalf("got err %v, want it to contain %q", err, c.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if file != c.wantFile || rc != c.wantRC {
+				t.Fatalf("got file=%q rc=%q, want file=%q rc=%q", file, rc, c.wantFile, c.wantRC)
+			}
+		})
+	}
+}

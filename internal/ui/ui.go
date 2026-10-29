@@ -16,7 +16,7 @@ var (
 
 func Saved(k, rc string) string {
 	return fmt.Sprintf("%s saved %s\n%s", brand, accent.Render(k),
-		grey.Render(fmt.Sprintf("Run `source %s` or open a new shell.", rc)))
+		grey.Render(fmt.Sprintf("Run `. %s` or open a new shell.", rc)))
 }
 
 func Copied(value string) string { return fmt.Sprintf("%s copied %s", brand, value) }

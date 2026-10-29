@@ -2,16 +2,28 @@
 
 ![Snip Demo](./demo.gif)
 
-Snip is a dead simple CLI tool that manages shell snippets as zsh aliases and functions, and copies them to your clipboard on demand.
+Snip is a dead simple CLI tool that manages shell snippets as POSIX-style aliases and functions.
 
 Ideal for keeping long commands one short key away.
 
 ## Quick Overview
 
 - **Aliases + Functions**: Plain snippets become `alias k='v'`; snippets with `$1`, `$2`, ... become shell functions.
-- **Auto-sourced**: Snippets live in one managed file, sourced from your `.zshrc` automatically.
+- **Auto-sourced**: Snippets live in one managed file, sourced from your shell rc automatically.
 - **Copy on demand**: `snip key` expands arguments and copies the result to your clipboard.
 - **Pretty Output**: Every command prints a branded `✂️ SNIP` message, and `snip ls` shows an easy-to-read table with alternating row colors.
+
+## Supported shells
+
+snip generates POSIX-style aliases and functions, so it supports:
+
+| Shell | Config file snip hooks into |
+|-------|-----------------------------|
+| zsh   | `~/.zshrc` |
+| bash  | `~/.bashrc` |
+| ksh   | `~/.kshrc` |
+
+snip detects your shell from `$SHELL`. If your shell is anything else (fish, nushell, PowerShell, ...), snip exits with an error and does not modify any files.
 
 ## Requirements
 
@@ -58,7 +70,7 @@ snip rm gs
 
 ### Output
 
-Snippets are stored in `~/.config/snip/snippets.zsh`:
+Snippets are stored in `~/.config/snip/snippets.sh`:
 
 ```
 # managed by snip, do not edit by hand
@@ -66,7 +78,7 @@ alias gs='git status'
 cpto() { cp $1 $2; }
 ```
 
-Run `source ~/.zshrc` (or open a new shell) after saving to use them directly.
+Run `. <rc>` (your shell's rc file, see above) or open a new shell after saving to use them directly.
 
 ### Commands
 
@@ -75,10 +87,13 @@ Run `source ~/.zshrc` (or open a new shell) after saving to use them directly.
 - `snip ls`: List snippets.
 - `snip rm key`: Delete a snippet.
 
-### Environment
+### Environment variables
 
-- `SNIP_FILE`: Snippets file (default: `~/.config/snip/snippets.zsh`)
-- `SNIP_RC`: Shell rc to source it from (default: `~/.zshrc`)
+| Variable | Purpose |
+|----------|---------|
+| `SNIP_SHELL` | Force one of the supported shells instead of using `$SHELL` |
+| `SNIP_FILE`  | Snippet file path (default `~/.config/snip/snippets.sh`) |
+| `SNIP_RC`    | Shell config file to hook into |
 
 ## Development
 
@@ -91,6 +106,7 @@ go build
 ```
 main.go            # CLI wiring
 internal/snip/     # parse, format, expand (pure)
+internal/shell/    # shell detection + rc resolution (pure)
 internal/store/    # file I/O + rc hook
 internal/clip/     # clipboard
 internal/ui/       # lipgloss styling

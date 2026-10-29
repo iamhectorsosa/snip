@@ -14,16 +14,18 @@ import (
 )
 
 func main() {
-	file, rc := store.Paths()
-
 	cmd := &cli.Command{
 		Name:      "snip",
-		Usage:     "manage shell snippets as zsh aliases/functions",
+		Usage:     "manage shell snippets as shell aliases/functions (zsh, bash, ksh)",
 		UsageText: "snip key='value'  |  snip key [args]  |  snip ls  |  snip rm key",
 		Action: func(_ context.Context, c *cli.Command) error {
 			args := c.Args().Slice()
 			if len(args) == 0 {
 				return cli.ShowRootCommandHelp(c)
+			}
+			file, rc, err := store.Paths()
+			if err != nil {
+				return err
 			}
 			ss, err := store.Load(file)
 			if err != nil {
@@ -59,6 +61,10 @@ func main() {
 				Name:  "ls",
 				Usage: "list snippets",
 				Action: func(_ context.Context, _ *cli.Command) error {
+					file, _, err := store.Paths()
+					if err != nil {
+						return err
+					}
 					ss, err := store.Load(file)
 					if err != nil {
 						return err
@@ -72,6 +78,10 @@ func main() {
 				Usage:     "delete a snippet",
 				ArgsUsage: "key",
 				Action: func(_ context.Context, c *cli.Command) error {
+					file, rc, err := store.Paths()
+					if err != nil {
+						return err
+					}
 					ss, err := store.Load(file)
 					if err != nil {
 						return err

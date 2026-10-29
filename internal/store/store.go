@@ -2,19 +2,30 @@ package store
 
 import (
 	"bytes"
-	"cmp"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/iamhectorsosa/snip/internal/shell"
 	"github.com/iamhectorsosa/snip/internal/snip"
 )
 
-func Paths() (file, rc string) {
-	home, _ := os.UserHomeDir()
-	file = cmp.Or(os.Getenv("SNIP_FILE"), filepath.Join(home, ".config", "snip", "snippets.zsh"))
-	rc = cmp.Or(os.Getenv("SNIP_RC"), filepath.Join(home, ".zshrc"))
-	return
+func Paths() (file, rc string, err error) {
+	sh, err := shell.Detect()
+	if err != nil {
+		return "", "", err
+	}
+
+	file = os.Getenv("SNIP_FILE")
+	if file == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", "", err
+		}
+		file = filepath.Join(home, ".config", "snip", "snippets.sh")
+	}
+
+	return file, sh.RC, nil
 }
 
 func Load(file string) ([]snip.Snip, error) {
